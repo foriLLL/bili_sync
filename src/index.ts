@@ -3,6 +3,8 @@ import https from "https";
 import WebSocket, { WebSocketServer } from "ws";
 
 interface State {
+  url?: string;
+  timestamp: number;
   currentTime: number;
   isPaused: boolean;
   playbackRate: number;
@@ -26,10 +28,9 @@ const port = 2333;
 const server = useHttps
   ? https.createServer({
       cert: fs.readFileSync("/root/nginx_certs/foril.space_bundle.crt"), // 证书链文件
-      key: fs.readFileSync("/root/nginx_certs/foril.space.key"),         // 私钥文件
+      key: fs.readFileSync("/root/nginx_certs/foril.space.key"), // 私钥文件
     })
   : undefined;
-
 
 // 创建 WebSocket Server
 const wss = new WebSocketServer({ server, port: useHttps ? undefined : port });
@@ -115,7 +116,10 @@ function handleJoin(socket: ExtWebSocket, sessionId: string) {
     sessions[sessionId].push(socket);
   }
 
-  console.log(`Current clients in session ${sessionId}:`, sessions[sessionId].length);
+  console.log(
+    `Current clients in session ${sessionId}:`,
+    sessions[sessionId].length
+  );
 }
 
 /**
@@ -148,7 +152,9 @@ function handleLeave(socket: ExtWebSocket) {
   const sessionSockets = sessions[socket.sessionId];
   if (!sessionSockets) return;
 
-  sessions[socket.sessionId] = sessionSockets.filter((client) => client !== socket);
+  sessions[socket.sessionId] = sessionSockets.filter(
+    (client) => client !== socket
+  );
 
   // 如果会话中没有客户端，删除会话
   if (sessions[socket.sessionId].length === 0) {
